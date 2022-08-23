@@ -4,7 +4,7 @@ build: build-lin build-win-x86 build-win-x64 #build-mac
 
 build-lin:
 	mkdir -p dist
-	go build -o dist/ktanemod-remote-math-interface.so -buildmode=c-shared .
+	go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
 
 build-win-x86:
 	mkdir -p dist
@@ -27,7 +27,7 @@ deploy: build
 	mkdir -p $(A)
 	mkdir -p $(A)/x86
 	mkdir -p $(A)/x86_64
-	cp dist/ktanemod-remote-math-interface.so $(A)/ktanemod-remote-math-interface.so
+	cp dist/libktanemod-remote-math-interface.so $(A)/libktanemod-remote-math-interface.so
 	cp dist/ktanemod-remote-math-interface-x86.dll $(A)/x86/ktanemod-remote-math-interface.dll
 	cp dist/ktanemod-remote-math-interface-x64.dll $(A)/x86_64/ktanemod-remote-math-interface.dll
 	#cp dist/ktanemod-remote-math-interface.dylib $(A)/ktanemod-remote-math-interface.dylib
