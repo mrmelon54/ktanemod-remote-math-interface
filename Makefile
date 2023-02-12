@@ -10,13 +10,13 @@ build-win-x86:
 	mkdir -p dist
 	$(eval A=$(abspath $(lastword $(MAKEFILE_LIST))))
 	$(eval B=$(dir $(A)))
-	docker run --rm -it -v /$(B):/go/work -w /go/work -e GOARCH=386 x1unix/go-mingw:1.18 go build -o dist/ktanemod-remote-math-interface-x86.dll -buildmode=c-shared .
+	docker run --rm -it -v $(B):/go/work -w /go/work -e GOARCH=386 x1unix/go-mingw:1.18 go build -o dist/ktanemod-remote-math-interface-x86.dll -buildmode=c-shared .
 
 build-win-x64:
 	mkdir -p dist
 	$(eval A=$(abspath $(lastword $(MAKEFILE_LIST))))
 	$(eval B=$(dir $(A)))
-	docker run --rm -it -v /$(B):/go/work -w /go/work -e GOARCH=amd64 x1unix/go-mingw:1.18 go build -o dist/ktanemod-remote-math-interface-x64.dll -buildmode=c-shared .
+	docker run --rm -it -v $(B):/go/work -w /go/work -e GOARCH=amd64 x1unix/go-mingw:1.18 go build -o dist/ktanemod-remote-math-interface-x64.dll -buildmode=c-shared .
 
 build-mac:
 	mkdir -p dist

@@ -7,78 +7,90 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
-	"time"
+	"sync/atomic"
 )
 
+var (
+	remoteMathServerProd = url.URL{Scheme: "wss", Host: "api.mrmelon54.com", Path: "/v1/remote-math"}
+	remoteMathServerDev  = url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/"}
+)
+
+var isEditor uint32
+var alreadyRunning uint32
+
+var upgrader = websocket.Upgrader{}
+
 func main() {
+	internalGoRunner(remoteMathServerDev)
+}
+
+//export RemoteMathIsEditor
+func RemoteMathIsEditor() {
+	atomic.SwapUint32(&isEditor, 1)
 }
 
 //export RemoteMathInterfaceEntry
 func RemoteMathInterfaceEntry() {
-	go internalGoRunner()
+	if atomic.SwapUint32(&alreadyRunning, 1) == 0 {
+		fmt.Println("[RemoteMathInterfaceEntry] Launching...")
+		a := remoteMathServerProd
+		if atomic.LoadUint32(&isEditor) == 1 {
+			a = remoteMathServerDev
+			fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
+		}
+		go internalGoRunner(a)
+	} else {
+		fmt.Println("[RemoteMathInterfaceEntry] Already running, ignoring this call...")
+	}
 }
 
-func internalGoRunner() {
-	fmt.Println("Hello from Go")
+func internalGoRunner(remoteMathServer url.URL) {
+	logger := log.New(os.Stdout, "[RemoteMathInterface] ", log.LstdFlags)
+	logger.Println("Starting Websocket Reverse Proxy")
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	u := url.URL{Scheme: "ws", Host: "localhost:6969", Path: "/echo"}
-	fmt.Printf("connecting to %s\n", u.String())
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		fmt.Println("dial:", err)
-		return
-	}
-	defer func(c *websocket.Conn) {
-		_ = c.Close()
-	}(c)
-
-	done := make(chan struct{})
-
-	go func() {
-		defer close(done)
-		for {
-			_, message, err := c.ReadMessage()
-			if err != nil {
-				fmt.Println("read:", err)
-				return
-			}
-			log.Printf("recv: %s", message)
-		}
-	}()
-
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-done:
+	http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
+		c, err := upgrader.Upgrade(rw, req, nil)
+		if err != nil {
+			logger.Println("upgrade:", err)
 			return
-		case t := <-ticker.C:
-			err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
-			if err != nil {
-				log.Println("write:", err)
-				return
-			}
-		case <-interrupt:
-			log.Println("interrupt")
+		}
+		defer c.Close()
 
-			// Cleanly close the connection by sending a close message and then
-			// waiting (with timeout) for the server to close the connection.
-			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				log.Println("write close:", err)
-				return
-			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-			}
+		logger.Printf("connecting to %s\n", remoteMathServer)
+		c2, _, err := websocket.DefaultDialer.Dial(remoteMathServer.String(), nil)
+		if err != nil {
+			fmt.Println("dial:", err)
+			return
+		}
+		defer c2.Close()
+
+		done := make(chan struct{}, 2)
+		go forwardWs(done, c, c2)
+		go forwardWs(done, c2, c)
+		<-done
+		logger.Printf("closing connection\n")
+	})
+	logger.Fatal(http.ListenAndServe(":8164", nil))
+}
+
+func forwardWs(done chan struct{}, cSrc, cDst *websocket.Conn) {
+	defer func() {
+		done <- struct{}{}
+	}()
+	for {
+		mt, msg, err := cSrc.ReadMessage()
+		if err != nil {
+			return
+		}
+		err = cDst.WriteMessage(mt, msg)
+		if err != nil {
 			return
 		}
 	}
