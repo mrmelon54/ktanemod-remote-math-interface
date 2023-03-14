@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	remoteMathServerProd = url.URL{Scheme: "wss", Host: "api.mrmelon54.com", Path: "/v1/remote-math"}
+	remoteMathServerProd = url.URL{Scheme: "wss", Host: "remote-math.mrmelon54.com", Path: "/"}
 	remoteMathServerDev  = url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/"}
 )
 
