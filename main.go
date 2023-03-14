@@ -24,31 +24,40 @@ var alreadyRunning uint32
 
 var upgrader = websocket.Upgrader{}
 
-func main() {
-	internalGoRunner(remoteMathServerDev)
-}
+func main() {}
 
 //export RemoteMathIsEditor
 func RemoteMathIsEditor() {
 	atomic.SwapUint32(&isEditor, 1)
 }
 
+//export RemoteMathNotEditor
+func RemoteMathNotEditor() {
+	atomic.SwapUint32(&isEditor, 0)
+}
+
 //export RemoteMathInterfaceEntry
 func RemoteMathInterfaceEntry() {
 	if atomic.SwapUint32(&alreadyRunning, 1) == 0 {
 		fmt.Println("[RemoteMathInterfaceEntry] Launching...")
-		a := remoteMathServerProd
-		if atomic.LoadUint32(&isEditor) == 1 {
-			a = remoteMathServerDev
-			fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
-		}
-		go internalGoRunner(a)
+		go internalGoRunner()
 	} else {
 		fmt.Println("[RemoteMathInterfaceEntry] Already running, ignoring this call...")
 	}
 }
 
-func internalGoRunner(remoteMathServer url.URL) {
+func getUsableParams() (url.URL, string) {
+	a := remoteMathServerProd
+	b := ":8164"
+	if atomic.LoadUint32(&isEditor) == 1 {
+		a = remoteMathServerDev
+		b = ":8165"
+		fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
+	}
+	return a, b
+}
+
+func internalGoRunner() {
 	logger := log.New(os.Stdout, "[RemoteMathInterface] ", log.LstdFlags)
 	logger.Println("Starting Websocket Reverse Proxy")
 
@@ -63,8 +72,10 @@ func internalGoRunner(remoteMathServer url.URL) {
 		}
 		defer c.Close()
 
-		logger.Printf("connecting to %s\n", remoteMathServer)
-		c2, _, err := websocket.DefaultDialer.Dial(remoteMathServer.String(), nil)
+		a, _ := getUsableParams()
+
+		logger.Printf("connecting to %s\n", a)
+		c2, _, err := websocket.DefaultDialer.Dial(a.String(), nil)
 		if err != nil {
 			fmt.Println("dial:", err)
 			return
@@ -77,7 +88,8 @@ func internalGoRunner(remoteMathServer url.URL) {
 		<-done
 		logger.Printf("closing connection\n")
 	})
-	logger.Fatal(http.ListenAndServe(":8164", nil))
+	_, b := getUsableParams()
+	logger.Fatal(http.ListenAndServe(b, nil))
 }
 
 func forwardWs(done chan struct{}, cSrc, cDst *websocket.Conn) {
