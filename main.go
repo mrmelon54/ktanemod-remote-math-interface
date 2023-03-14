@@ -6,6 +6,7 @@ import "C"
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -19,6 +20,7 @@ var (
 	remoteMathServerDev  = url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/"}
 )
 
+var isDev uint32
 var isEditor uint32
 var alreadyRunning uint32
 
@@ -28,6 +30,7 @@ func main() {}
 
 //export RemoteMathIsEditor
 func RemoteMathIsEditor() {
+	atomic.SwapUint32(&isDev, 1)
 	atomic.SwapUint32(&isEditor, 1)
 }
 
@@ -46,19 +49,27 @@ func RemoteMathInterfaceEntry() {
 	}
 }
 
-func getUsableParams() (url.URL, string) {
+func getUsableParams() url.URL {
 	a := remoteMathServerProd
-	b := ":8164"
 	if atomic.LoadUint32(&isEditor) == 1 {
 		a = remoteMathServerDev
-		b = ":8165"
-		fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
 	}
-	return a, b
+	return a
 }
 
 func internalGoRunner() {
-	logger := log.New(os.Stdout, "[RemoteMathInterface] ", log.LstdFlags)
+	var logFile io.Writer = os.Stdout
+	listenAddr := ":8164"
+	if atomic.LoadUint32(&isDev) == 1 {
+		fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
+		listenAddr = ":8165"
+		create, err := os.Create("remote-math-interface.log")
+		if err != nil {
+			panic(err)
+		}
+		logFile = create
+	}
+	logger := log.New(logFile, "[RemoteMathInterface] ", log.LstdFlags)
 	logger.Println("Starting Websocket Reverse Proxy")
 
 	interrupt := make(chan os.Signal, 1)
@@ -72,12 +83,12 @@ func internalGoRunner() {
 		}
 		defer c.Close()
 
-		a, _ := getUsableParams()
+		a := getUsableParams()
 
-		logger.Printf("connecting to %s\n", a)
+		logger.Printf("Connecting to %s\n", a.String())
 		c2, _, err := websocket.DefaultDialer.Dial(a.String(), nil)
 		if err != nil {
-			fmt.Println("dial:", err)
+			logger.Printf("dial: %s\n", err)
 			return
 		}
 		defer c2.Close()
@@ -86,10 +97,9 @@ func internalGoRunner() {
 		go forwardWs(done, c, c2)
 		go forwardWs(done, c2, c)
 		<-done
-		logger.Printf("closing connection\n")
+		logger.Printf("Closing connection\n")
 	})
-	_, b := getUsableParams()
-	logger.Fatal(http.ListenAndServe(b, nil))
+	logger.Fatal(http.ListenAndServe(listenAddr, nil))
 }
 
 func forwardWs(done chan struct{}, cSrc, cDst *websocket.Conn) {
