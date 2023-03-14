@@ -58,16 +58,17 @@ func getUsableParams() url.URL {
 }
 
 func internalGoRunner() {
-	var logFile io.Writer = os.Stdout
+	var logFile io.Writer
+	create, err := os.Create("remote-math-interface.log")
+	if err != nil {
+		logFile = os.Stdout
+	} else {
+		logFile = create
+	}
 	listenAddr := ":8164"
 	if atomic.LoadUint32(&isDev) == 1 {
 		fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
 		listenAddr = ":8165"
-		create, err := os.Create("remote-math-interface.log")
-		if err != nil {
-			panic(err)
-		}
-		logFile = create
 	}
 	logger := log.New(logFile, "[RemoteMathInterface] ", log.LstdFlags)
 	logger.Println("Starting Websocket Reverse Proxy")
