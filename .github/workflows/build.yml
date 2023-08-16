@@ -29,12 +29,15 @@ jobs:
           windows: |
             $env:CGO_ENABLED=1
             $env:GOOS="windows"
-            $archs = @("amd64", "386", "arm64", "arm")
-            foreach ($arch in $archs) {
-              Write-Host "Building for $arch"
-              $env:GOARCH = $arch
-              go build -o "dist/ktanemod-remote-math-interface-windows-$arch.dll" -buildmode=c-shared .
-            }
+
+            Write-Host "Building for amd64"
+            $env:GOARCH="amd64"
+            go build -o "dist/ktanemod-remote-math-interface-windows-amd64.dll" -buildmode=c-shared .
+
+            Write-Host "Building for 386"
+            $env:GOARCH="386"
+            $env:CC = "i686-w64-mingw32-gcc"
+            go build -o "dist/ktanemod-remote-math-interface-windows-386.dll" -buildmode=c-shared .
           macos: |
             export CGO_ENABLED=1
             export GOOS=darwin
