@@ -42,20 +42,16 @@ jobs:
         with:
           name: dist
           path: dist
-      - name: Create a Release
-        uses: elgohr/Github-Release-Action@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        with:
-          title: Loading
-      - name: Attach binaries to release
+      - name: Create Release and Attach Binaries
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -x
           assets=()
           for asset in ./dist/*; do
-            assets+=("-a" "$asset")
+            assets+=("$asset")
           done
           githubref=${{ github.ref }}
-          hub release edit "${assets[@]}" -m "${githubref##*/}" "${githubref##*/}"
+          version="${githubref##*/}"
+          gh release create "${version}" -t "${version}"
+          gh release upload "${version}" "${assets[@]}"
