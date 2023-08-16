@@ -9,3 +9,9 @@ The Go source code is compiled into DLL/SO/DYLIB binaries and is loaded by the m
 ## Build
 
 Just use GitHub actions its easier
+
+By default GitHub actions is configured to build the following binaries:
+
+  - Windows: amd64, 386, arm64, arm
+  - Linux: amd64, 386, arm64, arm
+  - Mac: amd64, arm64
