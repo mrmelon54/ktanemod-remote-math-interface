@@ -36,7 +36,7 @@ jobs:
 
             Write-Host "Building for 386"
             $env:GOARCH="386"
-            $env:CC = "i686-w64-mingw32-gcc"
+            $env:CC = "c:/programdata/chocolatey/lib/mingw/tools/install/mingw32/bin/i686-w64-mingw32-gcc"
             go build -o "dist/ktanemod-remote-math-interface-windows-386.dll" -buildmode=c-shared .
           macos: |
             export CGO_ENABLED=1
