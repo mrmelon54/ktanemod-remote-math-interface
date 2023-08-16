@@ -1,0 +1,5 @@
+name: 'Build Windows'
+description: 'A Docker container to build Windows DLLs'
+runs:
+  using: 'docker'
+  image: './windows-build/Dockerfile'
