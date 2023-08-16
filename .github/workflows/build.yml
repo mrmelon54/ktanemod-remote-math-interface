@@ -29,7 +29,7 @@ jobs:
           windows: |
             $env:CGO_ENABLED=1
             $env:GOOS="windows"
-            $arch = @("amd64", "386", "arm64", "arm")
+            $archs = @("amd64", "386", "arm64", "arm")
             foreach ($arch in $archs) {
               Write-Host "Building for $arch"
               $env:GOARCH = $arch
