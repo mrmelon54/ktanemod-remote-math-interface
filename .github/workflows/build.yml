@@ -15,24 +15,24 @@ jobs:
       - uses: knicknic/os-specific-run@v1
         with:
           linux: |
-            sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+            #sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
             export CGO_ENABLED=1
             export GOOS=linux
-            GOARCH=amd64 go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
-            GOARCH=386 go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
-            GOARCH=arm64 CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
+            GOARCH=amd64 go build -o dist/libktanemod-remote-math-interface-amd64.so -buildmode=c-shared .
+            GOARCH=386 go build -o dist/libktanemod-remote-math-interface-386.so -buildmode=c-shared .
+            #GOARCH=arm64 CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
             #GOARCH=arm CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
           windows: |
             set CGO_ENABLED=1
             set GOOS=windows
             set GOARCH=amd64
-            go build -o dist/ktanemod-remote-math-interface-x64.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-amd64.dll -buildmode=c-shared .
             set GOARCH=386
-            go build -o dist/ktanemod-remote-math-interface-x86.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-386.dll -buildmode=c-shared .
             set GOARCH=arm64
-            go build -o dist/ktanemod-remote-math-interface-x86.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-arm64.dll -buildmode=c-shared .
             set GOARCH=arm
-            go build -o dist/ktanemod-remote-math-interface-x86.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-arm.dll -buildmode=c-shared .
           macos: |
             export CGO_ENABLED=1
             export GOOS=darwin
