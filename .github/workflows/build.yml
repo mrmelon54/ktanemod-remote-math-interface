@@ -19,6 +19,9 @@ jobs:
             GOARCH=amd64 go build -o dist/ktanemod-remote-math-interface-x64.dll -buildmode=c-shared .
             GOARCH=386 go build -o dist/ktanemod-remote-math-interface-x86.dll -buildmode=c-shared .
           macos: |
+            export CGO_ENABLED=1
+            export GOOS=darwin
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             GOARCH=amd64 go build -o dist/ktanemod-remote-math-interface-amd64.dylib -buildmode=c-shared .
             GOARCH=arm64 go build -o dist/ktanemod-remote-math-interface-arm64.dylib -buildmode=c-shared .
       - uses: actions/upload-artifact@v2.2.1
