@@ -8,11 +8,4 @@ The Go source code is compiled into DLL/SO/DYLIB binaries and is loaded by the m
 
 ## Build
 
-```
-# Linux
-make build-lin
-# Windows
-make build-win
-# Mac
-make build-mac
-```
+Just use GitHub actions its easier
