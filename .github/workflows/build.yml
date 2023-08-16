@@ -15,13 +15,14 @@ jobs:
       - uses: knicknic/os-specific-run@v1
         with:
           linux: |
-            #sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+            sudo apt-get update
+            sudo apt-get install -y gcc-multilib gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
             export CGO_ENABLED=1
             export GOOS=linux
             GOARCH=amd64 go build -o dist/libktanemod-remote-math-interface-amd64.so -buildmode=c-shared .
-            GOARCH=386 go build -o dist/libktanemod-remote-math-interface-386.so -buildmode=c-shared .
-            #GOARCH=arm64 CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
-            #GOARCH=arm CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
+            GOARCH=386 CC_FOR_TARGET=i386-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-386.so -buildmode=c-shared .
+            GOARCH=arm64 CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
+            GOARCH=arm CC_FOR_TARGET=arm-linux-gnueabihf-gcc go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
           windows: |
             set CGO_ENABLED=1
             set GOOS=windows
