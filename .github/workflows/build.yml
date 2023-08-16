@@ -22,27 +22,27 @@ jobs:
               libc6-dev:i386 libc6-dev-arm64-cross libc6-dev-armhf-cross
             export CGO_ENABLED=1
             export GOOS=linux
-            GOARCH=amd64 go build -o dist/libktanemod-remote-math-interface-amd64.so -buildmode=c-shared .
-            GOARCH=386 CC=i686-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-386.so -buildmode=c-shared .
-            GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-arm64.so -buildmode=c-shared .
-            GOARCH=arm CC=arm-linux-gnueabihf-gcc go build -o dist/libktanemod-remote-math-interface-arm.so -buildmode=c-shared .
+            GOARCH=amd64 go build -o dist/libktanemod-remote-math-interface-linux-amd64.so -buildmode=c-shared .
+            GOARCH=386 CC=i686-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-linux-386.so -buildmode=c-shared .
+            GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-linux-arm64.so -buildmode=c-shared .
+            GOARCH=arm CC=arm-linux-gnueabihf-gcc go build -o dist/libktanemod-remote-math-interface-linux-arm.so -buildmode=c-shared .
           windows: |
             set CGO_ENABLED=1
             set GOOS=windows
             set GOARCH=amd64
-            go build -o dist/ktanemod-remote-math-interface-amd64.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-windows-amd64.dll -buildmode=c-shared .
             set GOARCH=386
-            go build -o dist/ktanemod-remote-math-interface-386.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-windows-386.dll -buildmode=c-shared .
             set GOARCH=arm64
-            go build -o dist/ktanemod-remote-math-interface-arm64.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-windows-arm64.dll -buildmode=c-shared .
             set GOARCH=arm
-            go build -o dist/ktanemod-remote-math-interface-arm.dll -buildmode=c-shared .
+            go build -o dist/ktanemod-remote-math-interface-windows-arm.dll -buildmode=c-shared .
           macos: |
             export CGO_ENABLED=1
             export GOOS=darwin
             export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            GOARCH=amd64 go build -o dist/ktanemod-remote-math-interface-amd64.dylib -buildmode=c-shared .
-            GOARCH=arm64 go build -o dist/ktanemod-remote-math-interface-arm64.dylib -buildmode=c-shared .
+            GOARCH=amd64 go build -o dist/ktanemod-remote-math-interface-darwin-amd64.dylib -buildmode=c-shared .
+            GOARCH=arm64 go build -o dist/ktanemod-remote-math-interface-darwin-arm64.dylib -buildmode=c-shared .
       - uses: actions/upload-artifact@v2.2.1
         with:
           name: dist
