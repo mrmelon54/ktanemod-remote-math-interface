@@ -21,7 +21,7 @@ jobs:
             GOARCH=amd64 go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
             GOARCH=386 go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
             GOARCH=arm64 CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
-            GOARCH=amd CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
+            GOARCH=arm CC_FOR_TARGET=gcc-aarch64-linux-gnu go build -o dist/libktanemod-remote-math-interface.so -buildmode=c-shared .
           windows: |
             set CGO_ENABLED=1
             set GOOS=windows
