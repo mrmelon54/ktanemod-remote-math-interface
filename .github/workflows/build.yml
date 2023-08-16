@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         go-version: [ 1.21.x ]
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/setup-go@v3
@@ -26,18 +26,6 @@ jobs:
             GOARCH=386 CC=i686-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-linux-386.so -buildmode=c-shared .
             GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-linux-arm64.so -buildmode=c-shared .
             GOARCH=arm CC=arm-linux-gnueabihf-gcc go build -o dist/libktanemod-remote-math-interface-linux-arm.so -buildmode=c-shared .
-          windows: |
-            $env:CGO_ENABLED=1
-            $env:GOOS="windows"
-
-            Write-Host "Building for amd64"
-            $env:GOARCH="amd64"
-            go build -o "dist/ktanemod-remote-math-interface-windows-amd64.dll" -buildmode=c-shared .
-
-            Write-Host "Building for 386"
-            $env:GOARCH="386"
-            $env:CC = "c:/programdata/chocolatey/lib/mingw/tools/install/mingw32/bin/i686-w64-mingw32-gcc"
-            go build -o "dist/ktanemod-remote-math-interface-windows-386.dll" -buildmode=c-shared .
           macos: |
             export CGO_ENABLED=1
             export GOOS=darwin
@@ -49,9 +37,38 @@ jobs:
           name: dist
           path: dist
 
+  build-win:
+    name: Build Windows
+    strategy:
+      matrix:
+        go-version: [ 1.20.1 ]
+        platform:
+          - { sys: mingw64, env: x86_64, arch: "amd64" }
+          - { sys: mingw32, env: i686, arch: "386" }
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.platform.sys }}
+      - run: |
+          $env:CGO_ENABLED=1
+          $env:GOOS="windows"
+
+          Write-Host "Building for ${{ matrix.platform.arch }}"
+          $env:GOARCH="${{ matrix.platform.arch }}"
+          go build -o "dist/ktanemod-remote-math-interface-windows-${{ matrix.platform.arch }}.dll" -buildmode=c-shared .
+      - uses: actions/upload-artifact@v2.2.1
+        with:
+          name: dist
+          path: dist
+
   release:
     name: Release binaries
-    needs: build
+    needs: [ build, build-win ]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
