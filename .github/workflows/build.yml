@@ -44,7 +44,7 @@ jobs:
           path: dist
       - name: Create Release and Attach Binaries
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -x
           assets=()
