@@ -4,6 +4,7 @@ package main
 import "C"
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"io"
@@ -20,23 +21,18 @@ var (
 	remoteMathServerDev  = url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/"}
 )
 
-var isDev uint32
-var isEditor uint32
 var alreadyRunning uint32
-
+var isDev bool
 var upgrader = websocket.Upgrader{}
 
-func main() {}
-
-//export RemoteMathIsEditor
-func RemoteMathIsEditor() {
-	atomic.SwapUint32(&isDev, 1)
-	atomic.SwapUint32(&isEditor, 1)
-}
-
-//export RemoteMathNotEditor
-func RemoteMathNotEditor() {
-	atomic.SwapUint32(&isEditor, 0)
+func main() {
+	flag.BoolVar(&isDev, "dev", false, "Enable developer mode")
+	flag.Parse()
+	if isDev {
+		RemoteMathInterfaceEntry()
+		a := make(chan struct{})
+		<-a
+	}
 }
 
 //export RemoteMathInterfaceEntry
@@ -51,7 +47,7 @@ func RemoteMathInterfaceEntry() {
 
 func getUsableParams() url.URL {
 	a := remoteMathServerProd
-	if atomic.LoadUint32(&isEditor) == 1 {
+	if isDev {
 		a = remoteMathServerDev
 	}
 	return a
@@ -66,7 +62,7 @@ func internalGoRunner() {
 		logFile = create
 	}
 	listenAddr := ":8164"
-	if atomic.LoadUint32(&isDev) == 1 {
+	if isDev {
 		fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
 		listenAddr = ":8165"
 	}
