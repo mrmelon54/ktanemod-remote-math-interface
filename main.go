@@ -6,6 +6,7 @@ import "C"
 import (
 	"flag"
 	"fmt"
+	"github.com/MrMelon54/exit-reload"
 	"github.com/gorilla/websocket"
 	"io"
 	"log"
@@ -30,8 +31,7 @@ func main() {
 	flag.Parse()
 	if isDev {
 		RemoteMathInterfaceEntry()
-		a := make(chan struct{})
-		<-a
+		exit_reload.ExitReload("RemoteMathInterface", func() {}, func() {})
 	}
 }
 
