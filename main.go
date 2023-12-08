@@ -23,13 +23,16 @@ var (
 )
 
 var alreadyRunning uint32
-var isDev bool
+var isRun, isDev bool
+var listenAddr string
 var upgrader = websocket.Upgrader{}
 
 func main() {
-	flag.BoolVar(&isDev, "dev", false, "Enable developer mode")
+	flag.BoolVar(&isRun, "run", false, "Run on startup")
+	flag.BoolVar(&isDev, "dev", false, "Use developer server address")
+	flag.StringVar(&listenAddr, "listen", ":8164", "Address to listen on")
 	flag.Parse()
-	if isDev {
+	if isRun {
 		RemoteMathInterfaceEntry()
 		exit_reload.ExitReload("RemoteMathInterface", func() {}, func() {})
 	}
@@ -61,11 +64,6 @@ func internalGoRunner() {
 	} else {
 		logFile = create
 	}
-	listenAddr := ":8164"
-	if isDev {
-		fmt.Println("[RemoteMathInterfaceEntry] Enabling development mode...")
-		listenAddr = ":8165"
-	}
 	logger := log.New(logFile, "[RemoteMathInterface] ", log.LstdFlags)
 	logger.Println("Starting Websocket Reverse Proxy")
 
@@ -96,6 +94,7 @@ func internalGoRunner() {
 		<-done
 		logger.Printf("Closing connection\n")
 	})
+	logger.Printf("Listening on '%s'\n", listenAddr)
 	logger.Fatal(http.ListenAndServe(listenAddr, nil))
 }
 
