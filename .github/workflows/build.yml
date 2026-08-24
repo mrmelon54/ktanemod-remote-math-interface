@@ -4,14 +4,14 @@ jobs:
   build:
     strategy:
       matrix:
-        go-version: [ 1.21.x ]
+        go-version: [ 1.27.x ]
         os: [ ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go-version }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: knicknic/os-specific-run@v1
         with:
           linux: |
@@ -32,7 +32,7 @@ jobs:
             export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             GOARCH=amd64 go build -o dist/ktanemod-remote-math-interface-darwin-amd64.dylib -buildmode=c-shared .
             GOARCH=arm64 go build -o dist/ktanemod-remote-math-interface-darwin-arm64.dylib -buildmode=c-shared .
-      - uses: actions/upload-artifact@v2.2.1
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -41,12 +41,12 @@ jobs:
     name: Build Windows
     strategy:
       matrix:
-        go-version: [ 1.21.x ]
+        go-version: [ 1.27.x ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: ./windows-build
-      - uses: actions/upload-artifact@v2.2.1
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -59,8 +59,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
