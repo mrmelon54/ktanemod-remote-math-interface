@@ -12,9 +12,8 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v7
-      - uses: knicknic/os-specific-run@v1
-        with:
-          linux: |
+      - run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
             sudo dpkg --add-architecture i386
             sudo apt-get update
             sudo apt-get install -y \
@@ -26,12 +25,16 @@ jobs:
             GOARCH=386 CC=i686-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-linux-386.so -buildmode=c-shared .
             GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o dist/libktanemod-remote-math-interface-linux-arm64.so -buildmode=c-shared .
             GOARCH=arm CC=arm-linux-gnueabihf-gcc go build -o dist/libktanemod-remote-math-interface-linux-arm.so -buildmode=c-shared .
-          macos: |
+          elif [ "$RUNNER_OS" == "macOS" ]; then
             export CGO_ENABLED=1
             export GOOS=darwin
             export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             GOARCH=amd64 go build -o dist/ktanemod-remote-math-interface-darwin-amd64.dylib -buildmode=c-shared .
             GOARCH=arm64 go build -o dist/ktanemod-remote-math-interface-darwin-arm64.dylib -buildmode=c-shared .
+          else
+            echo "$RUNNER_OS not supported"
+            exit 1
+          fi
       - uses: actions/upload-artifact@v7
         with:
           name: dist
