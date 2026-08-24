@@ -10,7 +10,7 @@ runs:
     - name: Build image
       shell: bash
       run: |
-        docker build --build-arg GO_VERSION="${{ inputs.go-version }}" -t remote-math-interface-windows-build:latest .
+        docker build --build-arg GO_VERSION="${{ inputs.go-version }}" -t remote-math-interface-windows-build:latest "${{ github.action_path }}"
 
     - name: Run image
       shell: bash
