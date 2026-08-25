@@ -69,6 +69,7 @@ jobs:
         with:
           name: dist
           path: dist
+          merge-multiple: true
       - name: Create Release and Attach Binaries
         env:
           GH_TOKEN: ${{ github.token }}
