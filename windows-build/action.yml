@@ -15,4 +15,4 @@ runs:
     - name: Run image
       shell: bash
       run: |
-        docker run --rm remote-math-interface-windows-build:latest
+        docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace remote-math-interface-windows-build:latest
