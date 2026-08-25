@@ -70,9 +70,7 @@ jobs:
           path: dist
           merge-multiple: true
       - name: List release files
-        run: |
-          ls -R
-          ls "./dist/*"
+        run: ls -R ./dist
       - name: Create Release and Attach Binaries
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         env:
