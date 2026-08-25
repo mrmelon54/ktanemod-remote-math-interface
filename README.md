@@ -12,6 +12,6 @@ Just use GitHub actions its easier
 
 By default GitHub actions is configured to build the following binaries:
 
-  - Windows: amd64, 386, arm64, arm
+  - Windows: amd64, 386
   - Linux: amd64, 386, arm64, arm
   - Mac: amd64, arm64
